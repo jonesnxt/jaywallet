@@ -89,7 +89,42 @@ public final class Constants {
                                                         is set as number of seconds before the current time. */
 
     public static final int EC_BLOCK_DISTANCE_LIMIT = 60;
+    
+    public static final byte TYPE_PAYMENT = 0;
+    public static final byte TYPE_MESSAGING = 1;
+    public static final byte TYPE_COLORED_COINS = 2;
+    public static final byte TYPE_DIGITAL_GOODS = 3;
+    public static final byte TYPE_ACCOUNT_CONTROL = 4;
 
+    public static final byte SUBTYPE_PAYMENT_ORDINARY_PAYMENT = 0;
+
+    public static final byte SUBTYPE_MESSAGING_ARBITRARY_MESSAGE = 0;
+    public static final byte SUBTYPE_MESSAGING_ALIAS_ASSIGNMENT = 1;
+    public static final byte SUBTYPE_MESSAGING_POLL_CREATION = 2;
+    public static final byte SUBTYPE_MESSAGING_VOTE_CASTING = 3;
+    public static final byte SUBTYPE_MESSAGING_HUB_ANNOUNCEMENT = 4;
+    public static final byte SUBTYPE_MESSAGING_ACCOUNT_INFO = 5;
+    public static final byte SUBTYPE_MESSAGING_ALIAS_SELL = 6;
+    public static final byte SUBTYPE_MESSAGING_ALIAS_BUY = 7;
+
+    public static final byte SUBTYPE_COLORED_COINS_ASSET_ISSUANCE = 0;
+    public static final byte SUBTYPE_COLORED_COINS_ASSET_TRANSFER = 1;
+    public static final byte SUBTYPE_COLORED_COINS_ASK_ORDER_PLACEMENT = 2;
+    public static final byte SUBTYPE_COLORED_COINS_BID_ORDER_PLACEMENT = 3;
+    public static final byte SUBTYPE_COLORED_COINS_ASK_ORDER_CANCELLATION = 4;
+    public static final byte SUBTYPE_COLORED_COINS_BID_ORDER_CANCELLATION = 5;
+
+    public static final byte SUBTYPE_DIGITAL_GOODS_LISTING = 0;
+    public static final byte SUBTYPE_DIGITAL_GOODS_DELISTING = 1;
+    public static final byte SUBTYPE_DIGITAL_GOODS_PRICE_CHANGE = 2;
+    public static final byte SUBTYPE_DIGITAL_GOODS_QUANTITY_CHANGE = 3;
+    public static final byte SUBTYPE_DIGITAL_GOODS_PURCHASE = 4;
+    public static final byte SUBTYPE_DIGITAL_GOODS_DELIVERY = 5;
+    public static final byte SUBTYPE_DIGITAL_GOODS_FEEDBACK = 6;
+    public static final byte SUBTYPE_DIGITAL_GOODS_REFUND = 7;
+
+    public static final byte SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING = 0;
+    
     private Constants() {} // never
 
 }
