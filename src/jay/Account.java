@@ -78,7 +78,7 @@ public class Account {
 	
 	
 	
-	public byte[] getBytes() {
+	/*public byte[] getBytes() {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(getSize());
             buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -119,7 +119,7 @@ public class Account {
             Logger.logDebugMessage("Failed to get transaction bytes for transaction: " + getJSONObject().toJSONString());
             throw e;
         }
-    }
+    }*/
 	
 	
 	public byte[] buildTransaction(long type, long subtype, long timestamp, long deadline, String senderPublicKey, long amountNQT, long feeNQT, long signature, long version)

@@ -5,7 +5,16 @@ package jay;
 
 import java.io.IOException;
 
-import com.swt.moonsand;
+import org.eclipse.swt.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
  
 
 /**
@@ -19,20 +28,39 @@ public class Main {
 	 * @throws IOException 
 	 */
 	public Nxtapi api = new Nxtapi();
-	public static void main(String[] args) throws IOException { 
-		System.out.println("hello");
+	public static void main(String[] args) { 
 		
-		
-		
+		Display display = new Display ();
+		Shell shell = new Shell (display);
+		Label label = new Label (shell, SWT.NONE);
+		label.setText ("Enter your name:");
+		Text text = new Text (shell, SWT.BORDER);
+		text.setLayoutData (new RowData (100, SWT.DEFAULT));
+		Button ok = new Button (shell, SWT.PUSH);
+		ok.setText ("OK");
+		ok.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("OK");
+			}
+		});
+		Button cancel = new Button (shell, SWT.PUSH);
+		cancel.setText ("Cancel");
+		cancel.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("Cancel");
+			}
+		});
+		shell.setDefaultButton (cancel);
+		shell.setLayout (new RowLayout ());
+		shell.pack ();
+		shell.open ();
+		while (!shell.isDisposed ()) {
+			if (!display.readAndDispatch ()) display.sleep ();
+		}
+		display.dispose ();
 
-		        JEditorPane website = new JEditorPane("http://nxtforum.org/");
-		        website.setEditable(false);
-
-		        JFrame frame = new JFrame("Google");
-		        frame.add(new JScrollPane(website));
-		        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		        frame.setVisible(true);
-		        frame.pack();
 
 
 		
