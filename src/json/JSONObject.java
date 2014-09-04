@@ -318,7 +318,7 @@ public class JSONObject {
      * @exception JSONException
      *                If there is a syntax error in the source string or a
      *                duplicated key.
-     */
+     */  
     public JSONObject(String source) throws JSONException {
         this(new JSONTokener(source));
     }

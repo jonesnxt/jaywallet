@@ -31,7 +31,7 @@ public class Main {
 	public static void main(String[] args) { 
 		
 		try {
-			System.out.println(Nxtapi.consensus("getAccount", "account=NXT-DSEY-S997-7G5H-29LT8"));
+			System.out.println("output: "+ Nxtapi.consensus("getBalance", "account=NXT-DSEY-S997-7G5H-29LT8"));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

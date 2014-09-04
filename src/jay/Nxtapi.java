@@ -3,6 +3,7 @@ package jay;
 import java.math.BigInteger;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.io.*;
 
@@ -25,8 +26,7 @@ public class Nxtapi {
 		        while ((inputLine = in.readLine()) != null) 
 		        	res += inputLine;
 		        in.close();
-		        
-		        
+		        if(res == "") res = "{\"e\":42}";
 		return new JSONObject(res);
 	}
 	
@@ -40,27 +40,34 @@ public class Nxtapi {
 		{
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
-			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));		
+			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
+			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
 		
 		
-		return jsons[mode(summ).intValue()];
+		return jsons[Arrays.asList(summ).indexOf(mode(Arrays.sort(summ)))];
 	}
 	
-	public static BigInteger mode(final BigInteger[] n) {
-	    BigInteger maxKey = BigInteger.ZERO;
-	    BigInteger maxCounts = BigInteger.ZERO;
-
-	    BigInteger[] counts = new BigInteger[n.length];
-
-	    for (int i=1; i < n.length; i++) {
-	        counts[i] = counts[i].add(BigInteger.ONE);
-	        if (maxCounts.intValue() < counts[i].intValue()) {
-	            maxCounts = counts[i];
-	            maxKey = n[i];
-	        }
-	    }
-	    return maxKey;
+	public static BigInteger mode(final BigInteger[] a) {
+		int popularity1 = 0;
+		  int popularity2 = 0;
+		  BigInteger popularity_item = BigInteger.ZERO;
+		  BigInteger array_item = BigInteger.ZERO; //Array contains integer value. Make it String if array contains string value.
+		  for(int i =0;i<a.length;i++){
+		      array_item = a[i];
+		      for(int j =0;j<a.length;j++){
+		          if(array_item == a[j])
+		             popularity1 ++;
+		          {
+		      if(popularity1 >= popularity2){
+		          popularity_item = array_item;
+		          popularity2 = popularity1;
+		      }
+		      popularity1 = 0;
+		          }
+		      }
+		  }
+		  return popularity_item;
 	}
 
 	
