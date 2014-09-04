@@ -30,6 +30,13 @@ public class Main {
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) { 
 		
+		try {
+			System.out.println(Nxtapi.consensus("getAccount", "account=NXT-DSEY-S997-7G5H-29LT8"));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		Display display = new Display ();
 		Shell shell = new Shell (display);
 		Label label = new Label (shell, SWT.NONE);

@@ -33,21 +33,36 @@ public class Nxtapi {
 	public static JSONObject consensus(String req, String opt) throws IOException
 	{
 		String[] nodes = listnodes();
-		int[][] summ = new int[2][];
-		int prev = 0;
+		BigInteger[] summ = new BigInteger[nodes.length];
+		JSONObject[] jsons = new JSONObject[nodes.length];
+		
 		for(int i=0;i < nodes.length; i++)
 		{
-			//summ[i][0] = get(nodes[i], req, opt).hashCode();
-			//if(now != prev && prev != 0)
-			//{
-			//	return new JSONObject("{\"errorCode\":\"42\"}");
-			//}
-			//prev = now;
-			System.out.println(new BigInteger(1, Crypto.sha256().digest(get(nodes[i], req, opt).toString().getBytes())));
-			
+			JSONObject j = get(nodes[i], req, opt);
+			jsons[i] = j;
+			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));		
 		}
-		return get(nodes[0], req, opt);
+		
+		
+		return jsons[mode(summ).intValue()];
 	}
+	
+	public static BigInteger mode(final BigInteger[] n) {
+	    BigInteger maxKey = BigInteger.ZERO;
+	    BigInteger maxCounts = BigInteger.ZERO;
+
+	    BigInteger[] counts = new BigInteger[n.length];
+
+	    for (int i=1; i < n.length; i++) {
+	        counts[i] = counts[i].add(BigInteger.ONE);
+	        if (maxCounts.intValue() < counts[i].intValue()) {
+	            maxCounts = counts[i];
+	            maxKey = n[i];
+	        }
+	    }
+	    return maxKey;
+	}
+
 	
 	static String[] listnodes()
 	{
