@@ -18,18 +18,33 @@ public class Nxtapi {
 		URL nd = new URL("http://"+node+":7876/nxt?requestType="+req+"&"+opt);
 
 		URLConnection yc = nd.openConnection();
+		
+		String res = "";
+		try {
+			yc.setConnectTimeout(1000);
+		
+		
 		BufferedReader in = new BufferedReader(
 		                                new InputStreamReader(
 		                                yc.getInputStream()));
 		        String inputLine;
-		        String res = "";
+		        
 		        while ((inputLine = in.readLine()) != null) 
 		        	res += inputLine;
 		        in.close();
 		        if(res == "") res = "{\"e\":42}";
-		return new JSONObject(res);
+		        
+		        
+} catch(java.net.SocketTimeoutException e) {
+			
+	return new JSONObject("{\"e\":42}");
+		}
+		 catch(java.net.UnknownHostException e)
+	{
+			 return new JSONObject("{\"e\":42}");
 	}
-	
+	return new JSONObject(res);
+	}
 	public static JSONObject consensus(String req, String opt) throws IOException
 	{
 		String[] nodes = listnodes();
@@ -44,8 +59,8 @@ public class Nxtapi {
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
 		
-		
-		return jsons[Arrays.asList(summ).indexOf(mode(Arrays.sort(summ)))];
+		Arrays.sort(summ);
+		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
 	
 	public static BigInteger mode(final BigInteger[] a) {
