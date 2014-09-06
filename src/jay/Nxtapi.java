@@ -60,7 +60,26 @@ public class Nxtapi {
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
-		Main.setinfo("done w/" + req);
+		Main.setinfo("done w/ " + req);
+		Arrays.sort(summ);
+		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
+	}
+	
+	public static JSONObject consensus(String req, String opt, String key) throws IOException
+	{
+		String[] nodes = listnodes();
+		BigInteger[] summ = new BigInteger[nodes.length];
+		JSONObject[] jsons = new JSONObject[nodes.length];
+		
+		for(int i=0;i < nodes.length; i++)
+		{
+			Main.setinfo("CON: " + req + " - " + nodes[i]);
+			JSONObject j = get(nodes[i], req, opt);
+			jsons[i] = j;
+			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes()));	
+			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes())));
+		}
+		Main.setinfo("done w/ " + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
@@ -116,6 +135,35 @@ public class Nxtapi {
 
 		//print out the list
 		return acc.split(";");
+	}
+	
+	public static void broadcast(String data) throws IOException
+	{
+		String urlParameters = "requestType=broadcastTransaction&transactionBytes="+data;
+		
+		String[] nodes = listnodes();
+		Main.setinfo("Broadcasting");
+		for(int i=0;i < nodes.length; i++)
+		{
+			URL url = new URL("http://"+nodes[i]+":7876/nxt"); 
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();           
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
+			connection.setInstanceFollowRedirects(false); 
+			connection.setRequestMethod("POST"); 
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			connection.setRequestProperty("charset", "utf-8");
+			connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+			connection.setUseCaches (false);
+	
+			DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+			connection.disconnect();
+		}
+		Main.setinfo("Transaction sent (:");
+		
 	}
 	
 }

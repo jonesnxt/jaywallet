@@ -4,6 +4,7 @@
 package jay;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.eclipse.swt.*;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -24,6 +25,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+
+import crypto.Convert;
  
 
 /**
@@ -67,7 +70,7 @@ public class Main {
 
 	        Main.info = new Label(shell, SWT.NONE);
 	        info.setText("Initialized");
-	        info.setLayoutData(format(230,20, "bottom", pass, 10));
+	        info.setLayoutData(format(400,20, "bottom", pass, 10));
 
 	        
 
@@ -97,6 +100,19 @@ public class Main {
 						e1.printStackTrace();
 					}
 	                // payment stuff
+	            }
+	        });
+	        
+	        bsend.addSelectionListener(new SelectionAdapter() {
+	            @Override
+	            public void widgetSelected(SelectionEvent e) {
+	                String bts = Convert.toHexString(new Account(pass.getText()).sendMoney(new Account(null, acc.getText()), Convert.parseLong(amt.getText())));
+	                try {
+						Nxtapi.broadcast(bts);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						 e1.printStackTrace();
+					}
 	            }
 	        });
 

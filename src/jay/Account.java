@@ -1,6 +1,7 @@
 package jay;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
@@ -32,12 +33,14 @@ public class Account {
 			id = Convert.parseAccountId(rsa);
 			JSONObject pubj = new JSONObject(Constants.JSON_DEF);
 			try {
-				pubj = Nxtapi.consensus("getPublicKey", "account="+rsa);
+				pubj = Nxtapi.consensus("getAccountPublicKey", "account="+rsa);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(!pubj.has("errorCode")) pub = pubj.getString("publicKey").getBytes();
+			
+			if(!pubj.has("errorCode")) pub = Convert.parseHexString(pubj.getString("publicKey"));
+			System.out.println(pub.length);
 			sec = "NOT APPLICABLE";
 		}
 		
@@ -102,12 +105,8 @@ public class Account {
     }
 	
 	int getSize() {
-        return signatureOffset() + 64  + (4 + 4 + 8) + 0;
-    }
-
-    private int signatureOffset() {
-        return 1 + 1 + 4 + 2 + 32 + 8 + (8 + 8 + 32);
-    }
+        return ((1 + 1 + 4 + 2 + 32 + 8 + (8 + 8 + 32)) + 64 + (4 + 4 + 8));
+	}
     
     private int getFlags() {
         int flags = 0;
@@ -131,8 +130,10 @@ public class Account {
     }
 	
 	public byte[] getBytes(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, byte[] sig) {
-        try {
-            ByteBuffer buffer = ByteBuffer.allocate(getSize());
+        ByteBuffer buffer = ByteBuffer.allocate(getSize());
+
+		try {
+            buffer = ByteBuffer.allocate(getSize());
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             buffer.put(type);
             buffer.put((byte) ((1 << 4) | subtype));
@@ -141,8 +142,8 @@ public class Account {
             buffer.put(pubkey);
             buffer.putLong(recid);
 
-                buffer.putLong(amt);
-                buffer.putLong(fee);
+                buffer.putLong(amt * Constants.ONE_NXT);
+                buffer.putLong(fee * Constants.ONE_NXT);
 
                  //referenced transactions
                 buffer.put(new byte[32]);
@@ -150,18 +151,22 @@ public class Account {
 
             buffer.put(sig != null ? sig : new byte[64]);
                 buffer.putInt(getFlags());
-                //buffer.putInt(ecBlockHeight);
-                buffer.putInt(0);
-                //buffer.putLong(ecBlockId);
+    			JSONObject st = Nxtapi.consensus("getBlockchainStatus", "", "numberOfBlocks");
+                buffer.putInt(st.getInt("numberOfBlocks")-5);
                 buffer.putLong(0);
+                //buffer.put(new byte[12]);
             /*for (Appendix appendage : appendages) {
                 appendage.putBytes(buffer);
             }*/
-            return buffer.array();
         } catch (RuntimeException e) {
             //Logger.logDebugMessage("Failed to get transaction bytes for transaction: " + getJSONObject().toJSONString());
             throw e;
-        }
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+                    return buffer.array();
+
     }
 	
 	public byte[] signed(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee)
@@ -172,12 +177,28 @@ public class Account {
 	
 	public byte[] sendMoney(Account recipient, long amt)
 	{
-		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, recipient.pub, recipient.id, amt, (Constants.ONE_NXT));
+		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, this.pub, recipient.id, amt, 1);
 	}
 	
 	int getTimestamp()
 	{
-		return (int) Constants.EPOCH_BEGINNING/1000;
+		return (int) Convert.getEpochTime();
+	}
+	
+	JSONObject getecblock()
+	{
+		JSONObject st = new JSONObject(Constants.JSON_DEF);
+		try {
+			JSONObject a = Nxtapi.consensus("getBlockchainStatus", "");
+			st = Nxtapi.consensus("getBlock", "height=" + (a.getInt("numberOfBlocks")-6));
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return st;
 	}
 	
 
