@@ -90,6 +90,8 @@ public final class Constants {
 
     public static final int EC_BLOCK_DISTANCE_LIMIT = 60;
     
+    public static final String JSON_DEF = "{\"errorCode\":\"json not defined\"}";
+    
     public static final byte TYPE_PAYMENT = 0;
     public static final byte TYPE_MESSAGING = 1;
     public static final byte TYPE_COLORED_COINS = 2;
@@ -124,6 +126,7 @@ public final class Constants {
     public static final byte SUBTYPE_DIGITAL_GOODS_REFUND = 7;
 
     public static final byte SUBTYPE_ACCOUNT_CONTROL_EFFECTIVE_BALANCE_LEASING = 0;
+    public static final byte TRANSACTION_VERSION = 1;
     
     private Constants() {} // never
 

@@ -17,6 +17,7 @@ import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -35,7 +36,7 @@ public class Main {
 	 * @param args
 	 * @throws IOException 
 	 */
-	
+	public static Label info;
 	public static void dealwapi(Display display)
 	{
 		       
@@ -54,9 +55,20 @@ public class Main {
 	        
 	        final Text acc = new Text(shell, SWT.BORDER);
 	        acc.setLocation(100, 10);
-	        acc.setLayoutData(new FormData(230,20));
-
+	        acc.setLayoutData(format(230,20, "left", lacc, 5));
 	        
+	        final Text amt = new Text(shell, SWT.BORDER);
+	        amt.setLocation(100, 10);
+	        amt.setLayoutData(format(230,20, "bottom", acc, 10));
+	        
+	        final Text pass = new Text(shell, SWT.PASSWORD+SWT.BORDER);
+	        pass.setLocation(100, 10);
+	        pass.setLayoutData(format(230,20, "bottom", amt, 10));
+
+	        Main.info = new Label(shell, SWT.NONE);
+	        info.setText("Initialized");
+	        info.setLayoutData(format(230,20, "bottom", pass, 10));
+
 	        
 
 	        Button bgetbal = new Button(shell, SWT.PUSH);
@@ -79,7 +91,7 @@ public class Main {
 	            @Override
 	            public void widgetSelected(SelectionEvent e) {
 	                try {
-						lacc.setText(Nxtapi.consensus("getBalance", "account="+acc.getText()).get("balanceNQT").toString());
+						Nxtapi.consensus("getBalance", "account="+acc.getText()).getString("balanceNQT").toString();
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -97,9 +109,25 @@ public class Main {
 	        }
 	}
 	
+	public static FormData format(int wid, int hei, String att, Control to, int offset)
+	{
+		FormData f = new FormData(wid, hei);
+		if(att == "left") f.left = new FormAttachment(to, offset, SWT.RIGHT);
+		if(att == "right") f.left = new FormAttachment(to, offset, SWT.LEFT);
+		if(att == "bottom") f.top = new FormAttachment(to, offset, SWT.BOTTOM);
+		return f;
+	}
+	
+	
+	public static void startup()
+	{
+		System.out.println("Jay wallet startup (:");
+		
+	}
+	
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) { 
-		
+		startup();
 		
 		Display display = new Display();
         dealwapi(display);
@@ -110,6 +138,12 @@ public class Main {
 		
 		
 		    }
+	
+	public static void setinfo(String dat)
+	{
+		Main.info.setText(dat);
+		Main.info.update();
+	}
 		
 }
 

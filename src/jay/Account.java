@@ -3,6 +3,8 @@ package jay;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import json.JSONObject;
 import crypto.Constants;
@@ -15,15 +17,39 @@ public class Account {
 	public byte[] pub;
 	public String sec;
 	
-	public Account(String phr)
+	public Account(String phr, String rsa)
 	{
-		sec = phr;
-		pub = Crypto.getPublicKey(phr);
-		id = Convert.fullHashToId(Crypto.sha256().digest(pub));
-		rs = Convert.rsAccount(id);
+		if(phr != null)
+		{
+			sec = phr;
+			pub = Crypto.getPublicKey(phr);
+			id = Convert.fullHashToId(Crypto.sha256().digest(pub));
+			rs = Convert.rsAccount(id);
+		}
+		else
+		{
+			rs = rsa;
+			id = Convert.parseAccountId(rsa);
+			JSONObject pubj = new JSONObject(Constants.JSON_DEF);
+			try {
+				pubj = Nxtapi.consensus("getPublicKey", "account="+rsa);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(!pubj.has("errorCode")) pub = pubj.getString("publicKey").getBytes();
+			sec = "NOT APPLICABLE";
+		}
+		
 	}
 	
-	String transaction(String recipientValue, String amountValue) throws IOException
+	public Account(String phr)
+	{
+		this(phr, null);
+	}
+	
+	
+	String checkTransaction(String recipientValue, String amountValue) throws IOException
 	{
 
 	    Long recipient;
@@ -75,58 +101,84 @@ public class Account {
 
     }
 	
+	int getSize() {
+        return signatureOffset() + 64  + (4 + 4 + 8) + 0;
+    }
+
+    private int signatureOffset() {
+        return 1 + 1 + 4 + 2 + 32 + 8 + (8 + 8 + 32);
+    }
+    
+    private int getFlags() {
+        int flags = 0;
+        /*int position = 1;
+        if (message != null) {
+            flags |= position;
+        }
+        position <<= 1;
+        if (encryptedMessage != null) {
+            flags |= position;
+        }
+        position <<= 1;
+        if (publicKeyAnnouncement != null) {
+            flags |= position;
+        }
+        position <<= 1;
+        if (encryptToSelfMessage != null) {
+            flags |= position;
+        }*/
+        return flags;
+    }
 	
-	
-	
-	/*public byte[] getBytes() {
+	public byte[] getBytes(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, byte[] sig) {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(getSize());
             buffer.order(ByteOrder.LITTLE_ENDIAN);
-            buffer.put(type.getType());
-            buffer.put((byte) ((1 << 4) | type.getSubtype()));
+            buffer.put(type);
+            buffer.put((byte) ((1 << 4) | subtype));
             buffer.putInt(timestamp);
             buffer.putShort(deadline);
-            buffer.put(senderPublicKey);
-            buffer.putLong(type.hasRecipient() ? Convert.nullToZero(recipientId) : Genesis.CREATOR_ID);
-            if (useNQT()) {
-                buffer.putLong(amountNQT);
-                buffer.putLong(feeNQT);
-                if (referencedTransactionFullHash != null) {
-                    buffer.put(Convert.parseHexString(referencedTransactionFullHash));
-                } else {
-                    buffer.put(new byte[32]);
-                }
-            } else {
-                buffer.putInt((int) (amountNQT / Constants.ONE_NXT));
-                buffer.putInt((int) (feeNQT / Constants.ONE_NXT));
-                if (referencedTransactionFullHash != null) {
-                    buffer.putLong(Convert.fullHashToId(Convert.parseHexString(referencedTransactionFullHash)));
-                } else {
-                    buffer.putLong(0L);
-                }
-            }
-            buffer.put(signature != null ? signature : new byte[64]);
-            if (version > 0) {
+            buffer.put(pubkey);
+            buffer.putLong(recid);
+
+                buffer.putLong(amt);
+                buffer.putLong(fee);
+
+                 //referenced transactions
+                buffer.put(new byte[32]);
+
+
+            buffer.put(sig != null ? sig : new byte[64]);
                 buffer.putInt(getFlags());
-                buffer.putInt(ecBlockHeight);
-                buffer.putLong(ecBlockId);
-            }
-            for (Appendix appendage : appendages) {
+                //buffer.putInt(ecBlockHeight);
+                buffer.putInt(0);
+                //buffer.putLong(ecBlockId);
+                buffer.putLong(0);
+            /*for (Appendix appendage : appendages) {
                 appendage.putBytes(buffer);
-            }
+            }*/
             return buffer.array();
         } catch (RuntimeException e) {
-            Logger.logDebugMessage("Failed to get transaction bytes for transaction: " + getJSONObject().toJSONString());
+            //Logger.logDebugMessage("Failed to get transaction bytes for transaction: " + getJSONObject().toJSONString());
             throw e;
         }
-    }*/
+    }
 	
-	
-	public byte[] buildTransaction(long type, long subtype, long timestamp, long deadline, String senderPublicKey, long amountNQT, long feeNQT, long signature, long version)
+	public byte[] signed(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee)
 	{
-		return new byte['d'];
-				
-	          
+		byte[] sig = Crypto.sign(getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, null), this.sec);
+		return getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, sig);
 	}
 	
+	public byte[] sendMoney(Account recipient, long amt)
+	{
+		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, recipient.pub, recipient.id, amt, (Constants.ONE_NXT));
+	}
+	
+	int getTimestamp()
+	{
+		return (int) Constants.EPOCH_BEGINNING/1000;
+	}
+	
+
 }

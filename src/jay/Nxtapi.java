@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.*;
 
+import crypto.Constants;
 import crypto.Crypto;
 import json.JSONObject;
 
@@ -32,16 +33,16 @@ public class Nxtapi {
 		        while ((inputLine = in.readLine()) != null) 
 		        	res += inputLine;
 		        in.close();
-		        if(res == "") res = "{\"e\":42}";
+		        if(res == "") res = Constants.JSON_DEF;
 		        
 		        
 } catch(java.net.SocketTimeoutException e) {
 			
-	return new JSONObject("{\"e\":42}");
+	return new JSONObject(Constants.JSON_DEF);
 		}
 		 catch(java.net.UnknownHostException e)
 	{
-			 return new JSONObject("{\"e\":42}");
+			 return new JSONObject(Constants.JSON_DEF);
 	}
 	return new JSONObject(res);
 	}
@@ -53,12 +54,13 @@ public class Nxtapi {
 		
 		for(int i=0;i < nodes.length; i++)
 		{
+			Main.setinfo("CON: " + req + " - " + nodes[i]);
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
-		
+		Main.setinfo("done w/" + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
