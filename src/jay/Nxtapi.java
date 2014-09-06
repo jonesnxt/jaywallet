@@ -2,9 +2,7 @@ package jay;
 
 import java.math.BigInteger;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.io.*;
 
 import crypto.Constants;
@@ -54,13 +52,13 @@ public class Nxtapi {
 		
 		for(int i=0;i < nodes.length; i++)
 		{
-			Main.setinfo("CON: " + req + " - " + nodes[i]);
+			Jay.setinfo("API: " + req + " - " + nodes[i]);
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
-		Main.setinfo("done w/ " + req);
+		Jay.setinfo("done w/ " + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
@@ -73,13 +71,13 @@ public class Nxtapi {
 		
 		for(int i=0;i < nodes.length; i++)
 		{
-			Main.setinfo("CON: " + req + " - " + nodes[i]);
+			Jay.setinfo("API: " + req + " - " + nodes[i]);
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes())));
 		}
-		Main.setinfo("done w/ " + req);
+		Jay.setinfo("done w/ " + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
@@ -142,27 +140,41 @@ public class Nxtapi {
 		String urlParameters = "requestType=broadcastTransaction&transactionBytes="+data;
 		
 		String[] nodes = listnodes();
-		Main.setinfo("Broadcasting");
+		Jay.setinfo("Broadcasting");
 		for(int i=0;i < nodes.length; i++)
 		{
-			URL url = new URL("http://"+nodes[i]+":7876/nxt"); 
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();           
-			connection.setDoOutput(true);
-			connection.setDoInput(true);
-			connection.setInstanceFollowRedirects(false); 
-			connection.setRequestMethod("POST"); 
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
-			connection.setRequestProperty("charset", "utf-8");
-			connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-			connection.setUseCaches (false);
-	
-			DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+			URL obj = new URL("http://"+nodes[i]+":7876/nxt");
+
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+	 		con.setRequestMethod("POST");
+			con.setRequestProperty("User-Agent", "Mozilla/5.0");
+			con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+	 
+			// Send post request
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
 			wr.writeBytes(urlParameters);
 			wr.flush();
 			wr.close();
-			connection.disconnect();
+	 
+			int responseCode = con.getResponseCode();
+			System.out.println("Response Code : " + responseCode);
+	 
+			BufferedReader in = new BufferedReader(
+			        new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+	 
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+	 
+			//print result
+			System.out.println(response.toString());
+	 
 		}
-		Main.setinfo("Transaction sent (:");
+		Jay.setinfo("Transaction sent (:");
 		
 	}
 	

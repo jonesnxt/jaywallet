@@ -2,6 +2,43 @@ jaywallet
 =========
 A lightweight java client for the nxt cryptocurrency.
 
-Still a major work in progress, doesn't currently build. I need to work out some installer stuff.
-I'd call this version 0.01A 
-Come back for more (:
+Version 0.01 has been released! Proof of Concept Edition
+
+How To Run:
+
+- download the repository
+- locate the release directory for your platform (linux, windows, mac)
+- either double click the jay.jar or run
+java -jar jay.jar
+
+Features:
+- Send Money to already established accounts
+- Barely functioning GUI
+
+Why Is This Cool:
+
+- takes consensus of multiple nodes for api calls
+- does all signing w/ the passphrase locally
+- passphrase is never sent to a node
+- no need to download the blockchain
+
+Compared To The Normal Client:
+- Size w/ db: (subject to Change)
+  NRS: 600MB
+  Jay: 4.5MB
+
+- Start time: (On my machine)
+  NRS: 36 sec. (w/ blocks) 30 min (w/o blocks)
+  Jay: 1 sec.
+
+In Development:
+- GUI that doesn't suck
+- Account creation w/ public key broadcaster
+- Place to put a public key to fund a new account
+- Recent trasactions 
+- Send messages
+- Send money through aliases
+- Asset exchange and Marketplace and all that cool stuff (far away)
+
+Disclaimer:
+- Jay is still in development, so it has a horrid gui and barely any functionality, it will get better over time.

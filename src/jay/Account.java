@@ -1,12 +1,8 @@
 package jay;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import json.JSONObject;
 import crypto.Constants;
 import crypto.Convert;
@@ -129,7 +125,7 @@ public class Account {
         return flags;
     }
 	
-	public byte[] getBytes(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, byte[] sig) {
+	public byte[] getBytes(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, int ecblock, byte[] sig) {
         ByteBuffer buffer = ByteBuffer.allocate(getSize());
 
 		try {
@@ -151,9 +147,8 @@ public class Account {
 
             buffer.put(sig != null ? sig : new byte[64]);
                 buffer.putInt(getFlags());
-    			JSONObject st = Nxtapi.consensus("getBlockchainStatus", "", "numberOfBlocks");
-                buffer.putInt(st.getInt("numberOfBlocks")-5);
-                buffer.putLong(0);
+                buffer.putInt(ecblock);
+                buffer.putLong(Convert.parseUnsignedLong(Nxtapi.consensus("getBlockId", "height="+ecblock).getString("block")));
                 //buffer.put(new byte[12]);
             /*for (Appendix appendage : appendages) {
                 appendage.putBytes(buffer);
@@ -169,15 +164,15 @@ public class Account {
 
     }
 	
-	public byte[] signed(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee)
+	public byte[] signed(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, int ecblock)
 	{
-		byte[] sig = Crypto.sign(getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, null), this.sec);
-		return getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, sig);
+		byte[] sig = Crypto.sign(getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, ecblock, null), this.sec);
+		return getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, ecblock, sig);
 	}
 	
 	public byte[] sendMoney(Account recipient, long amt)
 	{
-		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, this.pub, recipient.id, amt, 1);
+		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, this.pub, recipient.id, amt, 1, getecblock());
 	}
 	
 	int getTimestamp()
@@ -185,20 +180,18 @@ public class Account {
 		return (int) Convert.getEpochTime();
 	}
 	
-	JSONObject getecblock()
+	int getecblock()
 	{
 		JSONObject st = new JSONObject(Constants.JSON_DEF);
 		try {
-			JSONObject a = Nxtapi.consensus("getBlockchainStatus", "");
-			st = Nxtapi.consensus("getBlock", "height=" + (a.getInt("numberOfBlocks")-6));
-			
+			st = Nxtapi.consensus("getBlockchainStatus", "", "numberOfBlocks");			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return st;
+		return st.getInt("numberOfBlocks")-5;
 	}
 	
 
