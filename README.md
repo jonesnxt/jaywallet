@@ -8,7 +8,7 @@ Version 0.01 has been released! Proof of Concept Edition
 
 - download the repository
 - locate the release directory for your platform (linux, windows, mac)
-- either double click the jay.jar or run "java -jar jay.jar"
+- either double click the jay.jar or run "java -jar jay.jar"<br/>
   *must have java version 7 or higher to run
 
 <h3>Features:</h3>
@@ -23,13 +23,13 @@ Version 0.01 has been released! Proof of Concept Edition
 - no need to download the blockchain
 
 <h3>Compared To The Normal Client:</h3>
-- Size w/ db: (subject to Change)
-  NRS: 600MB
-  Jay: 4.5MB
+- Size w/ db: (subject to Change)<br/>
+  NRS: 600MB<br/>
+  Jay: 4.5MB<br/>
 
-- Start time: (On my machine)
-  NRS: 36 sec. (w/ blocks) 30 min (w/o blocks)
-  Jay: 1 sec.
+- Start time: (On my machine)<br/>
+  NRS: 36 sec. (w/ blocks) 30 min (w/o blocks)<br/>
+  Jay: 1 sec.<br/>
 
 <h3>In Development:</h3>
 - GUI that doesn't suck
