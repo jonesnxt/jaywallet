@@ -9,6 +9,7 @@ Version 0.01 has been released! Proof of Concept Edition
 - download the repository
 - locate the release directory for your platform (linux, windows, mac)
 - either double click the jay.jar or run "java -jar jay.jar"
+  *must have java version 7 or higher to run
 
 <h3>Features:</h3>
 - Send Money to already established accounts
