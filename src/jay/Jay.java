@@ -3,22 +3,23 @@
  */
 package jay;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 
+import json.JSONObject;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-
-import crypto.Convert;
+import crypto.Constants;
  
 
 /**
@@ -32,116 +33,134 @@ public class Jay {
 	 * @throws IOException 
 	 */
 	public static Label info;
-	public static void dealwapi(Display display)
-	{
-		       
-	        Shell shell = new Shell(display);
-	        shell.setText("Jay Wallet");
-	        shell.setSize(400, 300);
-	        
-	        
-	        
-	        FormLayout layout = new FormLayout();
-	        shell.setLayout(layout);
-	        
-	        final Label lacc = new Label(shell, SWT.NONE);
-	        lacc.setText("Account:");
-	        //lacc.setLayoutData(new FormData(100,30));
-	        
-	        final Text acc = new Text(shell, SWT.BORDER);
-	        acc.setLocation(100, 10);
-	        acc.setLayoutData(format(370,20, "bottom", lacc, 5));
-	        
-	        final Label lamt = new Label(shell, SWT.NONE);
-	        lamt.setText("Amount:");
-	        lamt.setLayoutData(format(60,20, "bottom", acc, 10));
-
-	        
-	        final Text amt = new Text(shell, SWT.BORDER);
-	        amt.setLocation(100, 10);
-	        amt.setLayoutData(format(370,20, "bottom", lamt, 5));
-	        
-	        final Label lpass = new Label(shell, SWT.NONE);
-	        lpass.setText("Secret Phrase:");
-	        lpass.setLayoutData(format(120,20, "bottom", amt, 10));
-	        
-	        final Text pass = new Text(shell, SWT.PASSWORD+SWT.BORDER);
-	        pass.setLocation(100, 10);
-	        pass.setLayoutData(format(370,20, "bottom", lpass, 5));
-
-	        Jay.info = new Label(shell, SWT.NONE);
-	        info.setText("Initialized");
-	        info.setLayoutData(format(400,20, "bottom", pass, 10));
-
-	        
-
-
-	        Button bsend = new Button(shell, SWT.PUSH);
-	        bsend.setText("Send Money");
-
-	        FormData fbsend = new FormData(100, 30);
-	        fbsend.right = new FormAttachment(98);
-	        fbsend.bottom = new FormAttachment(95);
-	        bsend.setLayoutData(fbsend);
-	        
-	        bsend.addSelectionListener(new SelectionAdapter() {
-	            @Override
-	            public void widgetSelected(SelectionEvent e) {
-	                String bts = Convert.toHexString(new Account(pass.getText()).sendMoney(new Account(null, acc.getText()), Convert.parseLong(amt.getText())));
-	                System.out.println(bts);
-	                try {
-						Nxtapi.broadcast(bts);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						 e1.printStackTrace();
-					}
-	            }
-	        });
-
-	        shell.open();
-
-	        while (!shell.isDisposed()) {
-	          if (!display.readAndDispatch()) {
-	            display.sleep();
-	          }
-	        }
-	}
 	
-	public static FormData format(int wid, int hei, String att, Control to, int offset)
-	{
-		FormData f = new FormData(wid, hei);
-		if(att.contains("left")) f.left = new FormAttachment(to, offset, SWT.RIGHT);
-		if(att.contains("right")) f.left = new FormAttachment(to, offset, SWT.LEFT);
-		if(att.contains("bottom")) f.top = new FormAttachment(to, offset, SWT.BOTTOM);
-		return f;
-	}
-	
-	
-	public static void startup()
+	public static Account master;
+	public static JSONObject trans;
+	public static JSONObject data;
+	public static void startup(Display display)
 	{
 		System.out.println("Jay wallet startup (:");
+		Shell shell = new Shell(display);
+        shell.setText("Jay Wallet");
+        shell.setSize(300, 100);
+		shell.setLayout(new FillLayout());
+		
+        Jay.info = new Label(shell, SWT.NONE);
+        Jay.setinfo("startup");
+        
+        shell.open();
+        trans = new JSONObject(Constants.JSON_DEF);
+        data = new JSONObject(Constants.JSON_DEF);
+        master = new Account(getFile("nxt.pass"));
+		try {
+			trans = Nxtapi.consensus("getAccountTrasactions", "account="+master.rs);
+			data = Nxtapi.consensus("getAccount", "account="+master.rs);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(trans.toString());
+		
+		shell.close();
+		
 		
 	}
 	
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) { 
-		startup();
+		Display display = Display.getDefault();
 		
-		Display display = new Display();
-        dealwapi(display);
-        display.dispose();
-
-
-
+		startup(display);
+		
+		//Display display = new Display();
+        //newlayout(display);
+        //display.dispose();
+		Shell shell2 = new Shell(display);
+		shell2.setLayout(new FillLayout());
+		shell2.setText("Jay Wallet");
+		final Browser browser;
+		try {
+			browser = new Browser(shell2, SWT.NONE);
+		} catch (SWTError e) {
+			System.out.println("Could not instantiate Browser: " + e.getMessage());
+			display.dispose();
+			return;
+		}
+		shell2.open();
+		browser.setText(getFile("html/index.html"));
+		
+		final BrowserFunction getaddress = new Fgetaddress (browser, "getaddress ");
+		final BrowserFunction gettransaction = new Fgettransactions (browser, "gettransactions");
 		
 		
-		    }
+		while (!shell2.isDisposed()) {
+			if (!display.readAndDispatch()) display.sleep();
+		}
+		display.dispose();
+		
+		
+}
+	
+	static String getFile(String f)
+	{
+			File file = new File(f);
+			BufferedReader reader = null;
+			String acc = "";
+
+			try {
+			    reader = new BufferedReader(new FileReader(file));
+			    String text = null;
+			    while ((text = reader.readLine()) != null) {
+			        acc += text;
+			    }
+			} catch (FileNotFoundException e) {
+			    e.printStackTrace();
+			} catch (IOException e) {
+			    e.printStackTrace();
+			} finally {
+			    try {
+			        if (reader != null) {
+			            reader.close();
+			        }
+			    } catch (IOException e) {
+			    }
+			}
+			
+
+			//print out the list
+			return acc;
+	}
 	
 	public static void setinfo(String dat)
 	{
 		Jay.info.setText(dat);
 		Jay.info.update();
 	}
+	
+	
+	static class Fgetaddress extends BrowserFunction {
+		Fgetaddress (Browser browser, String name) {
+			super (browser, name);
+		}
+		@Override
+		public String function (Object[] arguments) {
+			return master.rs;
+		}
+	}
+	
+	static class Fgettransactions extends BrowserFunction {
+		Fgettransactions (Browser browser, String name) {
+			super (browser, name);
+		}
+		@Override
+		public String function (Object[] arguments) {			
+			return "abc";
+			
+		}
+	}
 		
 }
+
+
 
