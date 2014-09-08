@@ -31,8 +31,7 @@ public class Nxtapi {
 		        while ((inputLine = in.readLine()) != null) 
 		        	res += inputLine;
 		        in.close();
-		        if(res == "") res = Constants.JSON_DEF;
-		        
+		        if(res == "" || res.charAt(0) != '{') res = Constants.JSON_DEF;
 		        
 } catch(java.net.SocketTimeoutException e) {
 			
@@ -43,6 +42,7 @@ public class Nxtapi {
 			 return new JSONObject(Constants.JSON_DEF);
 	}
 	return new JSONObject(res);
+	
 	}
 	public static JSONObject consensus(String req, String opt) throws IOException
 	{

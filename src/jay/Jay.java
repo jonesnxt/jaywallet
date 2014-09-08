@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import json.JSONArray;
 import json.JSONObject;
 
 import org.eclipse.swt.SWT;
@@ -19,6 +20,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
 import crypto.Constants;
  
 
@@ -71,7 +73,7 @@ public class Jay {
 	public static void main(String[] args) { 
 		Display display = Display.getDefault();
 		
-		startup(display);
+		//startup(display);
 		
 		//Display display = new Display();
         //newlayout(display);
@@ -92,7 +94,7 @@ public class Jay {
 		
 		final BrowserFunction getaddress = new Fgetaddress (browser, "getaddress ");
 		final BrowserFunction gettransaction = new Fgettransactions (browser, "gettransactions");
-		
+
 		
 		while (!shell2.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
@@ -154,8 +156,27 @@ public class Jay {
 			super (browser, name);
 		}
 		@Override
-		public String function (Object[] arguments) {			
-			return "abc";
+		public String function (Object[] arguments) {
+			System.out.println("abc");
+			JSONObject tra = new JSONObject(getFile("testtrans.txt"));
+			JSONArray arr = tra.getJSONArray("transaction");
+			String acc = "";
+			System.out.println("abc");
+
+			for(int a=0; a <= arr.length(); a++)
+			{
+				JSONObject ind = arr.getJSONObject(a);
+				acc += "<tr>";
+				acc += "<td>" + ind.getLong("amountNQT")/Constants.ONE_NXT + "</td>";
+				acc += "<td>" + ind.getString("senderRS") + "</td>";
+				acc += "<td>" + "10 sec ago" + "</td>";
+				acc += "<td>" + "0 Confs" + "</td>";
+				acc += "</tr>";
+				
+			}
+			
+			System.out.println(acc);
+			return acc;
 			
 		}
 	}
