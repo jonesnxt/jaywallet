@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import crypto.Constants;
+import crypto.Convert;
  
 
 /**
@@ -71,9 +72,10 @@ public class Jay {
 	
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) { 
+		System.out.println("hello?");
 		Display display = Display.getDefault();
 		
-		//startup(display);
+		startup(display);
 		
 		//Display display = new Display();
         //newlayout(display);
@@ -92,9 +94,9 @@ public class Jay {
 		shell2.open();
 		browser.setText(getFile("html/index.html"));
 		
-		final BrowserFunction getaddress = new Fgetaddress (browser, "getaddress ");
-		final BrowserFunction gettransaction = new Fgettransactions (browser, "gettransactions");
-
+		new Fgetaddress (browser, "getaddress");
+		new Fgettransactions (browser, "gettransactions");
+		new Fgetamount (browser, "getamount");
 		
 		while (!shell2.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
@@ -151,6 +153,16 @@ public class Jay {
 		}
 	}
 	
+	static class Fgetamount extends BrowserFunction {
+		Fgetamount (Browser browser, String name) {
+			super (browser, name);
+		}
+		@Override
+		public String function (Object[] arguments) {
+			return data.getString("unconfirmedBalanceNQT");
+		}
+	}
+	
 	static class Fgettransactions extends BrowserFunction {
 		Fgettransactions (Browser browser, String name) {
 			super (browser, name);
@@ -159,11 +171,12 @@ public class Jay {
 		public String function (Object[] arguments) {
 			System.out.println("abc");
 			JSONObject tra = new JSONObject(getFile("testtrans.txt"));
-			JSONArray arr = tra.getJSONArray("transaction");
+			System.out.println(tra.toString());
+			JSONArray arr = tra.getJSONArray("transactions");
 			String acc = "";
 			System.out.println("abc");
 
-			for(int a=0; a <= arr.length(); a++)
+			for(int a=0; a != arr.length(); a++)
 			{
 				JSONObject ind = arr.getJSONObject(a);
 				acc += "<tr>";
