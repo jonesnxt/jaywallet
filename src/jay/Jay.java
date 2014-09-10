@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Date;
 
 import json.JSONArray;
 import json.JSONObject;
@@ -142,6 +143,30 @@ public class Jay {
 		Jay.info.update();
 	}
 	
+	public static String timeago(int timestamp)
+	{
+		Date abc = new Date();
+		
+		long fromnow =  (System.currentTimeMillis()/1000) - (Constants.EPOCH_BEGINNING/1000) - timestamp;
+		
+		int days = (int) Math.floor(fromnow/86400);
+		int hours = (int) Math.floor((fromnow%86400)/3600);
+		int minutes = (int) Math.floor((fromnow%3600)/60);
+		int seconds = (int) Math.floor(fromnow&60);
+		String acc = "";
+		if(days != 0 && days != 1) acc = days + " days ago";
+		else if(days == 1) acc = " 1 day ago";
+		else if(hours != 0 && hours != 1) acc = hours + " hours ago";
+		else if(hours == 1) acc = "1 hour ago";
+		else if(minutes != 0 && minutes != 1) acc = minutes + " minutes ago";
+		else if(minutes == 1) acc = "1 minute ago";
+		else if(seconds != 0 && seconds != 1) acc = seconds + " seconds ago";
+		else if(seconds == 1) acc = "1 second ago";
+		else acc = "just now";
+		
+		return acc;
+	}
+	
 	
 	static class Fgetaddress extends BrowserFunction {
 		Fgetaddress (Browser browser, String name) {
@@ -182,8 +207,8 @@ public class Jay {
 				acc += "<tr>";
 				acc += "<td>" + ind.getLong("amountNQT")/Constants.ONE_NXT + "</td>";
 				acc += "<td>" + ind.getString("senderRS") + "</td>";
-				acc += "<td>" + "10 sec ago" + "</td>";
-				acc += "<td>" + "0 Confs" + "</td>";
+				acc += "<td>" + timeago(ind.getInt("timestamp")) + "</td>";
+				acc += "<td>" + ind.getInt("confirmations") + "</td>";
 				acc += "</tr>";
 				
 			}
@@ -193,6 +218,7 @@ public class Jay {
 			
 		}
 	}
+	
 		
 }
 
