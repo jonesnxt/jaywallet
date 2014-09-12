@@ -26,6 +26,10 @@ import crypto.Constants;
 import crypto.Convert;
  
 
+import org.eclipse.jetty.server.Server;
+
+
+
 /**
  * @author jones
  *
@@ -73,6 +77,7 @@ public class Jay {
 	
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) { 
+		startjetty();
 		System.out.println("hello?");
 		Display display = Display.getDefault();
 		
@@ -219,6 +224,20 @@ public class Jay {
 		}
 	}
 	
+	
+	public static void startjetty()
+	{
+
+		        Server server = new Server(2020);
+		        try {
+					server.start();
+					server.join();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		        
+	}
 		
 }
 
