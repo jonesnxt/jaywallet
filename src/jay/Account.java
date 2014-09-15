@@ -3,7 +3,9 @@ package jay;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import json.JSONObject;
+
+import org.json.simple.JSONObject;
+
 import crypto.Constants;
 import crypto.Convert;
 import crypto.Crypto;
@@ -27,7 +29,7 @@ public class Account {
 		{
 			rs = rsa;
 			id = Convert.parseAccountId(rsa);
-			JSONObject pubj = new JSONObject(Constants.JSON_DEF);
+			JSONObject pubj = Constants.JSON_DEF;
 			try {
 				pubj = Nxtapi.consensus("getAccountPublicKey", "account="+rsa);
 			} catch (IOException e) {
@@ -35,7 +37,7 @@ public class Account {
 				e.printStackTrace();
 			}
 			
-			if(!pubj.has("errorCode")) pub = Convert.parseHexString(pubj.getString("publicKey"));
+			if(!pubj.containsKey("errorCode")) pub = Convert.parseHexString(pubj.get("publicKey").toString());
 			System.out.println(pub.length);
 			sec = "NOT APPLICABLE";
 		}
@@ -87,9 +89,9 @@ public class Account {
 	     // calculate the account account balance
 	     
 	     JSONObject bal = Nxtapi.get("127.0.0.1", "getBalance", "account="+this.rs);
-	     if(bal.has("errorCode")) return "sender account not found";
+	     if(bal.containsKey("errorCode")) return "sender account not found";
 	
-	    if (Convert.safeAdd(amountNQT, feeNQT) > bal.getLong("unconfirmedBalanceNQT")) {
+	    if (Convert.safeAdd(amountNQT, feeNQT) > (Long) bal.get("unconfirmedBalanceNQT")) {
 	
 	        return "Not enough NXT";
 	
@@ -148,7 +150,7 @@ public class Account {
             buffer.put(sig != null ? sig : new byte[64]);
                 buffer.putInt(getFlags());
                 buffer.putInt(ecblock);
-                buffer.putLong(Convert.parseUnsignedLong(Nxtapi.consensus("getBlockId", "height="+ecblock).getString("block")));
+                buffer.putLong(Convert.parseUnsignedLong((String) Nxtapi.consensus("getBlockId", "height="+ecblock).get("block")));
                 //buffer.put(new byte[12]);
             /*for (Appendix appendage : appendages) {
                 appendage.putBytes(buffer);
@@ -191,7 +193,7 @@ public class Account {
 			e.printStackTrace();
 		}
 		
-		return st.getInt("numberOfBlocks")-5;
+		return (int) st.get("numberOfBlocks")-5;
 	}
 	
 

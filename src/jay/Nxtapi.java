@@ -5,19 +5,82 @@ import java.net.*;
 import java.util.Arrays;
 import java.io.*;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import crypto.Constants;
 import crypto.Crypto;
-import json.JSONObject;
+
 
 public class Nxtapi {
 
+	public class getThread implements Runnable {
+
+	    public JSONObject run(String node, String req, String opt) throws IOException{
+
+
+			URL nd = new URL("http://"+node+":7876/nxt?requestType="+req+"&"+opt);
+
+			URLConnection yc = nd.openConnection();
+			
+			String res = "";
+			try {
+				yc.setConnectTimeout(1000);
+			
+			
+			BufferedReader in = new BufferedReader(
+			                                new InputStreamReader(
+			                                yc.getInputStream()));
+			        String inputLine;
+			        
+			        while ((inputLine = in.readLine()) != null) 
+			        	res += inputLine;
+			        in.close();
+			        if(res == "" || res.charAt(0) != '{') res = Constants.JSON_DEF.toJSONString();
+			        
+	} catch(java.net.SocketTimeoutException e) {
+				
+		return Constants.JSON_DEF;
+			}
+			 catch(java.net.UnknownHostException e)
+		{
+				 return Constants.JSON_DEF;
+		}
+		return (JSONObject) JSONValue.parse(res);
+		
+	  }
+
+		@Override
+		public void run() {
+			System.out.println("hello");
+			
+		}
+	}
+	
+	public static JSONObject multicon(String req, String opt) throws IOException
+	{
+		String[] nodes = listnodes();
+		BigInteger[] summ = new BigInteger[nodes.length];
+		JSONObject[] jsons = new JSONObject[nodes.length];
+		for(int i=0;i < nodes.length; i++)
+		{
+			//Jay.setinfo("API: " + req + " - " + nodes[i]);
+			JSONObject j = get(nodes[i], req, opt);
+			jsons[i] = j;
+			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
+			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
+		}
+		//Jay.setinfo("done w/ " + req);
+		Arrays.sort(summ);
+		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
+	}
+	
+	
 	public static JSONObject get(String node, String req, String opt) throws IOException
 	{
-		
 		URL nd = new URL("http://"+node+":7876/nxt?requestType="+req+"&"+opt);
 
 		URLConnection yc = nd.openConnection();
-		
 		String res = "";
 		try {
 			yc.setConnectTimeout(1000);
@@ -31,17 +94,17 @@ public class Nxtapi {
 		        while ((inputLine = in.readLine()) != null) 
 		        	res += inputLine;
 		        in.close();
-		        if(res == "" || res.charAt(0) != '{') res = Constants.JSON_DEF;
+		        if(res == "" || res.charAt(0) != '{') res = Constants.JSON_DEF.toJSONString();
 		        
 } catch(java.net.SocketTimeoutException e) {
 			
-	return new JSONObject(Constants.JSON_DEF);
+	return Constants.JSON_DEF;
 		}
 		 catch(java.net.UnknownHostException e)
 	{
-			 return new JSONObject(Constants.JSON_DEF);
+			 return Constants.JSON_DEF;
 	}
-	return new JSONObject(res);
+	return (JSONObject) JSONValue.parse(res);
 	
 	}
 	public static JSONObject consensus(String req, String opt) throws IOException
@@ -52,13 +115,13 @@ public class Nxtapi {
 		
 		for(int i=0;i < nodes.length; i++)
 		{
-			Jay.setinfo("API: " + req + " - " + nodes[i]);
+			//Jay.setinfo("API: " + req + " - " + nodes[i]);
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
 		}
-		Jay.setinfo("done w/ " + req);
+		//Jay.setinfo("done w/ " + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
@@ -68,16 +131,17 @@ public class Nxtapi {
 		String[] nodes = listnodes();
 		BigInteger[] summ = new BigInteger[nodes.length];
 		JSONObject[] jsons = new JSONObject[nodes.length];
-		
 		for(int i=0;i < nodes.length; i++)
 		{
-			Jay.setinfo("API: " + req + " - " + nodes[i]);
+			
+			//Jay.setinfo("API: " + req + " - " + nodes[i]);
+			
 			JSONObject j = get(nodes[i], req, opt);
 			jsons[i] = j;
 			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes()));	
 			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes())));
 		}
-		Jay.setinfo("done w/ " + req);
+		//Jay.setinfo("done w/ " + req);
 		Arrays.sort(summ);
 		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
 	}
@@ -140,7 +204,7 @@ public class Nxtapi {
 		String urlParameters = "requestType=broadcastTransaction&transactionBytes="+data;
 		
 		String[] nodes = listnodes();
-		Jay.setinfo("Broadcasting");
+		//Jay.setinfo("Broadcasting");
 		for(int i=0;i < nodes.length; i++)
 		{
 			URL obj = new URL("http://"+nodes[i]+":7876/nxt");
@@ -174,7 +238,7 @@ public class Nxtapi {
 			System.out.println(response.toString());
 	 
 		}
-		Jay.setinfo("Transaction sent (:");
+		//Jay.setinfo("Transaction sent (:");
 		
 	}
 	

@@ -10,8 +10,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 
-import json.JSONArray;
-import json.JSONObject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -22,11 +24,24 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import api.APIServlet;
 import crypto.Constants;
 import crypto.Convert;
- 
 
+import org.eclipse.jetty.http.HttpTester.Request;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.*;
+import org.eclipse.jetty.server.nio.*;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 
 
@@ -54,12 +69,11 @@ public class Jay {
 		shell.setLayout(new FillLayout());
 		
         Jay.info = new Label(shell, SWT.NONE);
-        Jay.setinfo("startup");
         
         shell.open();
         trans = new JSONObject(Constants.JSON_DEF);
         data = new JSONObject(Constants.JSON_DEF);
-        master = new Account(getFile("nxt.pass"));
+        master = new Account(getfile("nxt.pass"));
 		try {
 			trans = Nxtapi.consensus("getAccountTrasactions", "account="+master.rs);
 			data = Nxtapi.consensus("getAccount", "account="+master.rs);
@@ -76,43 +90,52 @@ public class Jay {
 	}
 	
 	public Nxtapi api = new Nxtapi();
-	public static void main(String[] args) { 
+	public static void main(String[] args) throws InterruptedException { 
+		
 		startjetty();
+		
+		
 		System.out.println("hello?");
 		Display display = Display.getDefault();
 		
-		startup(display);
+		//startup(display);
+		
+		Shell shell2 = new Shell(display);
+		shell2.setLayout(new FillLayout());
+		shell2.setText("NXT Lightweight");
 		
 		//Display display = new Display();
         //newlayout(display);
         //display.dispose();
-		Shell shell2 = new Shell(display);
-		shell2.setLayout(new FillLayout());
-		shell2.setText("Jay Wallet");
+		
 		final Browser browser;
 		try {
-			browser = new Browser(shell2, SWT.NONE);
+			browser = new Browser(shell2, SWT.WEBKIT);
 		} catch (SWTError e) {
 			System.out.println("Could not instantiate Browser: " + e.getMessage());
 			display.dispose();
 			return;
 		}
-		shell2.open();
-		browser.setText(getFile("html/index.html"));
 		
-		new Fgetaddress (browser, "getaddress");
-		new Fgettransactions (browser, "gettransactions");
-		new Fgetamount (browser, "getamount");
+		
+		
+		//Thread.sleep(500000);
+		shell2.open();
+		
+
+		browser.setUrl("http://127.0.0.1:9987/");
+		
+		//new Fgetaddress (browser, "getaddress");
+		//new Fgettransactions (browser, "gettransactions");
+		//new Fgetamount (browser, "getamount");
 		
 		while (!shell2.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
 		}
 		display.dispose();
-		
-		
 }
 	
-	static String getFile(String f)
+	static String getfile(String f)
 	{
 			File file = new File(f);
 			BufferedReader reader = null;
@@ -142,11 +165,6 @@ public class Jay {
 			return acc;
 	}
 	
-	public static void setinfo(String dat)
-	{
-		Jay.info.setText(dat);
-		Jay.info.update();
-	}
 	
 	public static String timeago(int timestamp)
 	{
@@ -189,7 +207,7 @@ public class Jay {
 		}
 		@Override
 		public String function (Object[] arguments) {
-			return data.getString("unconfirmedBalanceNQT");
+			return (String) data.get("unconfirmedBalanceNQT");
 		}
 	}
 	
@@ -200,20 +218,20 @@ public class Jay {
 		@Override
 		public String function (Object[] arguments) {
 			System.out.println("abc");
-			JSONObject tra = new JSONObject(getFile("testtrans.txt"));
+			JSONObject tra = (JSONObject) JSONValue.parse(getfile("testtrans.txt"));
 			System.out.println(tra.toString());
-			JSONArray arr = tra.getJSONArray("transactions");
+			JSONArray arr = (JSONArray) tra.get("transactions");
 			String acc = "";
 			System.out.println("abc");
 
-			for(int a=0; a != arr.length(); a++)
+			for(int a=0; a != arr.size(); a++)
 			{
-				JSONObject ind = arr.getJSONObject(a);
+				JSONObject ind = (JSONObject) arr.get(a);
 				acc += "<tr>";
-				acc += "<td>" + ind.getLong("amountNQT")/Constants.ONE_NXT + "</td>";
-				acc += "<td>" + ind.getString("senderRS") + "</td>";
-				acc += "<td>" + timeago(ind.getInt("timestamp")) + "</td>";
-				acc += "<td>" + ind.getInt("confirmations") + "</td>";
+				acc += "<td>" + (Long) ind.get("amountNQT")/Constants.ONE_NXT + "</td>";
+				acc += "<td>" + (String) ind.get("senderRS") + "</td>";
+				acc += "<td>" +  timeago((int)ind.get("timestamp")) + "</td>";
+				acc += "<td>" + (int) ind.get("confirmations") + "</td>";
 				acc += "</tr>";
 				
 			}
@@ -223,23 +241,90 @@ public class Jay {
 			
 		}
 	}
-	
-	
-	public static void startjetty()
-	{
 
-		        Server server = new Server(2020);
-		        try {
-					server.start();
-					server.join();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		        
+	static void startjetty()
+	{
+		/*final Server server = new Server();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(9987);
+        server.addConnector(connector);
+ 
+        ResourceHandler resource_handler = new ResourceHandler();
+        resource_handler.setDirectoriesListed(true);
+        resource_handler.setWelcomeFiles(new String[]{ "index.html" });
+ 
+        resource_handler.setResourceBase("html");
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler() });
+        server.setHandler(handlers);
+ 
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    server.start();
+                    server.join();
+                } catch (Exception e) {
+                    throw new RuntimeException(e.toString(), e);
+                }
+
+            }
+        };
+        
+	       new Thread(r, "jetty").start();
+        
+			*/
+			
+		
+		
+		Server server = new Server();
+		 
+        ServerConnector connector;
+        connector = new ServerConnector(server);
+		connector.setPort(9987);
+		connector.setHost("127.0.0.1");
+        connector.setIdleTimeout(30000);
+        connector.setReuseAddress(true);
+        server.addConnector(connector);
+        HandlerList apiHandlers = new HandlerList();
+        
+        ServletContextHandler apiHandler = new ServletContextHandler();
+
+        ServletHolder defaultServletHolder = new ServletHolder(new DefaultServlet());
+        defaultServletHolder.setInitParameter("dirAllowed", "false");
+        defaultServletHolder.setInitParameter("resourceBase", "html/ui");
+        defaultServletHolder.setInitParameter("welcomeServlets", "true");
+        defaultServletHolder.setInitParameter("redirectWelcome", "true");
+        defaultServletHolder.setInitParameter("gzip", "false");
+        apiHandler.addServlet(defaultServletHolder, "/*");
+        apiHandler.setWelcomeFiles(new String[]{"index.html"});
+        apiHandler.addServlet(APIServlet.class, "/nxt");
+        
+        apiHandlers.addHandler(apiHandler);
+        apiHandlers.addHandler(new DefaultHandler());
+       
+
+
+        server.setHandler(apiHandlers);
+        server.setStopAtShutdown(true);
+        
+        try {
+			server.start();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("???");
+		}
+        
+        
 	}
+	
+	
+	
 		
 }
+
+
 
 
 
