@@ -75,7 +75,7 @@ public final class APIServlet extends HttpServlet {
         map.put("getAssets", APIConsensus.GetAssets.instance);
         map.put("getAllAssets", APIConsensus.GetAllAssets.instance);
         map.put("getBlockId", APIConsensus.GetBlockId.instance);
-        map.put("getAccountPublicKey", APIConsensus.GetAccountPublicKey.instance);
+        /*map.put("getAccountPublicKey", APIConsensus.GetAccountPublicKey.instance);
         map.put("getAlias", APIConsensus.GetAlias.instance);
         map.put("getAccountId", APIConsensus.GetAccountId.instance);
         map.put("getAccountBlockIds", APIConsensus.GetAccountBlockIds.instance);
@@ -88,7 +88,7 @@ public final class APIServlet extends HttpServlet {
         map.put("getDGSPendingPurchases", APIConsensus.GetDGSPendingPurchases.instance);
         map.put("getGuaranteedBalance", APIConsensus.GetGuaranteedBalance.instance);
         map.put("getMyInfo", APIConsensus.GetMyInfo.instance);
-        map.put("getAssetsByIssuer", APIConsensus.GetAssetsByIssuer.instance);
+        map.put("getAssetsByIssuer", APIConsensus.GetAssetsByIssuer.instance);*/
 
         /*map.put("broadcastTransaction", BroadcastTransaction.instance);
         map.put("calculateFullHash", CalculateFullHash.instance);

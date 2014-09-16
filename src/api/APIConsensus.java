@@ -53,17 +53,7 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		
-				response = Nxtapi.consensus("getBalance", "account="+req.getParameter("account"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getBalance");
 	    }
 
 	}
@@ -78,17 +68,7 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		
-				response = Nxtapi.consensus("getAccount", "account="+req.getParameter("account"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getAccount");
 	    }
 
 	}
@@ -103,24 +83,8 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		Enumeration<String> params = req.getParameterNames();
-	       		String param = "";
-	       		String total = "";
-	       		while(params.hasMoreElements())
-	       		{
-	       			param = params.nextElement();
-	       			total += param + "=" + req.getParameter(param) + "&";
-	       		}
-				response = Nxtapi.consensus("getAccountTransactionIds", total);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getAccountTransactionIds");
+
 	    }
 
 	}
@@ -135,24 +99,8 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		Enumeration<String> params = req.getParameterNames();
-	       		String param = "";
-	       		String total = "";
-	       		while(params.hasMoreElements())
-	       		{
-	       			param = params.nextElement();
-	       			total += param + "=" + req.getParameter(param) + "&";
-	       		}
-				response = Nxtapi.consensus("getAccountTransactions", total);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getAccountTransactions");
+
 	    }
 
 	}
@@ -167,24 +115,8 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		Enumeration<String> params = req.getParameterNames();
-	       		String param = "";
-	       		String total = "";
-	       		while(params.hasMoreElements())
-	       		{
-	       			param = params.nextElement();
-	       			total += param + "=" + req.getParameter(param) + "&";
-	       		}
-				response = Nxtapi.consensus("getBlock", total);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getBlock");
+
 	    }
 
 	}
@@ -199,26 +131,98 @@ public class APIConsensus {
 
 	    @Override
 	    JSONStreamAware processRequest(HttpServletRequest req) {
-	    	JSONObject response = Constants.JSON_DEF;
-	       	try {
-	       		Enumeration<String> params = req.getParameterNames();
-	       		String param = "";
-	       		String total = "";
-	       		while(params.hasMoreElements())
-	       		{
-	       			param = params.nextElement();
-	       			total += param + "=" + req.getParameter(param) + "&";
-	       		}
-				response = Nxtapi.consensus("getAsset", total);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-			}
-	       	
-	        return response;
+	        return process(req, "getAsset");
+
 	    }
 
+	}
+	
+	public static class GetAliases extends APIServlet.APIRequestHandler {
+
+	    static final GetAliases instance = new GetAliases();
+
+	    private GetAliases() {
+	        super(new APITag[] {APITag.ALIASES}, "timestamp", "account");
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+	        return process(req, "getAliases");
+
+	    }
+
+	}
+	
+	public static class GetAssets extends APIServlet.APIRequestHandler {
+
+	    static final GetAssets instance = new GetAssets();
+
+	    private GetAssets() {
+	        super(new APITag[] {APITag.AE}, "assets", "assets", "assets"); // limit to 3 for testing
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+	        return process(req, "GetAssets");
+
+	    }
+
+	}
+	
+	public static class GetAllAssets extends APIServlet.APIRequestHandler {
+
+	    static final GetAllAssets instance = new GetAllAssets();
+
+	    private GetAllAssets() {
+	        super(new APITag[] {APITag.AE});
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+	        return process(req, "GetAllAssets");
+
+	    }
+
+	}
+	
+	public static class GetBlockId extends APIServlet.APIRequestHandler {
+
+	    static final GetBlockId instance = new GetBlockId();
+
+	    private GetBlockId() {
+	        super(new APITag[] {APITag.BLOCKS}, "height");
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+	        return process(req, "GetBlockId");
+
+	    }
+
+	}
+	
+	
+	// process all of the API forward requests
+	public static JSONStreamAware process(HttpServletRequest req, String call)
+	{
+		JSONObject response = Constants.JSON_DEF;
+       	try {
+       		Enumeration<String> params = req.getParameterNames();
+       		String param = "";
+       		String total = "";
+       		while(params.hasMoreElements())
+       		{
+       			param = params.nextElement();
+       			total += param + "=" + req.getParameter(param) + "&";
+       		}
+			response = Nxtapi.consensus(call, total);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+       	
+        return response;
 	}
 	
 	
