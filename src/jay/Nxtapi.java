@@ -13,68 +13,50 @@ import crypto.Crypto;
 
 
 public class Nxtapi {
-
-	public class getThread implements Runnable {
-
-	    public JSONObject run(String node, String req, String opt) throws IOException{
-
-
-			URL nd = new URL("http://"+node+":7876/nxt?requestType="+req+"&"+opt);
-
-			URLConnection yc = nd.openConnection();
-			
-			String res = "";
-			try {
-				yc.setConnectTimeout(1000);
-			
-			
-			BufferedReader in = new BufferedReader(
-			                                new InputStreamReader(
-			                                yc.getInputStream()));
-			        String inputLine;
-			        
-			        while ((inputLine = in.readLine()) != null) 
-			        	res += inputLine;
-			        in.close();
-			        if(res == "" || res.charAt(0) != '{') res = Constants.JSON_DEF.toJSONString();
-			        
-	} catch(java.net.SocketTimeoutException e) {
-				
-		return Constants.JSON_DEF;
-			}
-			 catch(java.net.UnknownHostException e)
-		{
-				 return Constants.JSON_DEF;
-		}
-		return (JSONObject) JSONValue.parse(res);
-		
-	  }
-
-		@Override
-		public void run() {
-			System.out.println("hello");
-			
-		}
-	}
+	public static final int SERVERS = 3;
 	
-	public static JSONObject multicon(String req, String opt) throws IOException
+	
+	static class Ping extends Thread
 	{
-		String[] nodes = listnodes();
-		BigInteger[] summ = new BigInteger[nodes.length];
-		JSONObject[] jsons = new JSONObject[nodes.length];
-		for(int i=0;i < nodes.length; i++)
+		public String node;
+		public String req;
+		public String opt;
+		public String key;
+		public int i;
+		
+		public static JSONObject[] jsons = new JSONObject[SERVERS];
+		public static BigInteger[] summ = new BigInteger[SERVERS];
+		
+		public Ping(String nd, String rq, String pt, String ky, int ival)
 		{
-			//Jay.setinfo("API: " + req + " - " + nodes[i]);
-			JSONObject j = get(nodes[i], req, opt);
-			jsons[i] = j;
-			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
-			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
+			node = nd;
+			req = rq;
+			opt = pt;
+			key = ky;
+			i = ival;
 		}
-		//Jay.setinfo("done w/ " + req);
-		Arrays.sort(summ);
-		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
+		
+		public void run()
+		{
+			JSONObject j = (JSONObject) JSONValue.parse("{\"errorOn\":\"" + i + "\"}");
+			try {
+				j = get(node, req, opt);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			jsons[i] = j;
+			
+			if(key != "") summ[i]= new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes()));
+			else summ[i] = new BigInteger(1, Crypto.sha256().digest(j.toJSONString().getBytes()));
+			//System.out.println(summ[i].toString(16));
+			this.interrupt();
+		}
+		
+		
+		
 	}
-	
 	
 	public static JSONObject get(String node, String req, String opt) throws IOException
 	{
@@ -109,41 +91,45 @@ public class Nxtapi {
 	}
 	public static JSONObject consensus(String req, String opt) throws IOException
 	{
-		String[] nodes = listnodes();
-		BigInteger[] summ = new BigInteger[nodes.length];
-		JSONObject[] jsons = new JSONObject[nodes.length];
-		
-		for(int i=0;i < nodes.length; i++)
-		{
-			//Jay.setinfo("API: " + req + " - " + nodes[i]);
-			JSONObject j = get(nodes[i], req, opt);
-			jsons[i] = j;
-			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes()));	
-			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.toString().getBytes())));
-		}
-		//Jay.setinfo("done w/ " + req);
-		Arrays.sort(summ);
-		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
+		return consensus(req, opt, "");
 	}
 	
 	public static JSONObject consensus(String req, String opt, String key) throws IOException
 	{
-		String[] nodes = listnodes();
-		BigInteger[] summ = new BigInteger[nodes.length];
-		JSONObject[] jsons = new JSONObject[nodes.length];
-		for(int i=0;i < nodes.length; i++)
-		{
-			
-			//Jay.setinfo("API: " + req + " - " + nodes[i]);
-			
-			JSONObject j = get(nodes[i], req, opt);
-			jsons[i] = j;
-			summ[i]= new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes()));	
-			System.out.println(new BigInteger(1, Crypto.sha256().digest(j.get(key).toString().getBytes())));
+		JSONObject fin;
+		int loops = 0;
+		do {
+			String[] nodes = listnodes();
+			BigInteger[] summ = new BigInteger[SERVERS];
+			JSONObject[] jsons = new JSONObject[SERVERS];
+			Ping[] pings = new Ping[SERVERS];
+			for(int i=0;i < SERVERS; i++)
+			{
+				pings[i] = new Ping(nodes[i], req, opt, key, i);
+				pings[i].start();
+			}
+			for(int i=0;i < SERVERS; i++)
+			{
+				try {
+					pings[i].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			for(int i=0;i < SERVERS; i++)
+			{
+				pings[i].interrupt();
+			}
+			summ = Ping.summ;
+			jsons = Ping.jsons;
+			Arrays.sort(summ);
+			Ping.summ = new BigInteger[SERVERS];
+			Ping.jsons = new JSONObject[SERVERS];
+			fin = jsons[Arrays.asList(summ).indexOf(mode(summ))];
 		}
-		//Jay.setinfo("done w/ " + req);
-		Arrays.sort(summ);
-		return jsons[Arrays.asList(summ).indexOf(mode(summ))];
+		while(!fin.containsKey("errorOn") && ++loops == 3);
+		return fin;
 	}
 	
 	public static BigInteger mode(final BigInteger[] a) {

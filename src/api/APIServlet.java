@@ -75,9 +75,9 @@ public final class APIServlet extends HttpServlet {
         map.put("getAssets", APIConsensus.GetAssets.instance);
         map.put("getAllAssets", APIConsensus.GetAllAssets.instance);
         map.put("getBlockId", APIConsensus.GetBlockId.instance);
-        /*map.put("getAccountPublicKey", APIConsensus.GetAccountPublicKey.instance);
+        map.put("getAccountPublicKey", APIConsensus.GetAccountPublicKey.instance);
         map.put("getAlias", APIConsensus.GetAlias.instance);
-        map.put("getAccountId", APIConsensus.GetAccountId.instance);
+        //map.put("getAccountId", APIConsensus.GetAccountId.instance);
         map.put("getAccountBlockIds", APIConsensus.GetAccountBlockIds.instance);
         map.put("getDGSGoods", APIConsensus.GetDGSGoods.instance);
         map.put("getAssetIds", APIConsensus.GetAssetIds.instance);
@@ -88,9 +88,37 @@ public final class APIServlet extends HttpServlet {
         map.put("getDGSPendingPurchases", APIConsensus.GetDGSPendingPurchases.instance);
         map.put("getGuaranteedBalance", APIConsensus.GetGuaranteedBalance.instance);
         map.put("getMyInfo", APIConsensus.GetMyInfo.instance);
-        map.put("getAssetsByIssuer", APIConsensus.GetAssetsByIssuer.instance);*/
+        map.put("getAssetsByIssuer", APIConsensus.GetAssetsByIssuer.instance);
+        
+        //map.put("getPeer", APIConsensus.GetPeer.instance);
+        //map.put("getPeers", APIConsensus.GetPeers.instance);
+        //map.put("getPoll", APIConsensus.GetPoll.instance);
+        //map.put("getPollIds", APIConsensus.GetPollIds.instance);
+        map.put("getState", APIConsensus.GetState.instance);
+        map.put("getTime", APIConsensus.GetTime.instance);
+        map.put("getTrades", APIConsensus.GetTrades.instance);
+        map.put("getAllTrades", APIConsensus.GetAllTrades.instance);
+        map.put("getTransaction", APIConsensus.GetTransaction.instance);
+        map.put("getTransactionBytes", APIConsensus.GetTransactionBytes.instance);
+        map.put("getUnconfirmedTransactionIds", APIConsensus.GetUnconfirmedTransactionIds.instance);
+        map.put("getUnconfirmedTransactions", APIConsensus.GetUnconfirmedTransactions.instance);
+        map.put("getAccountCurrentAskOrderIds", APIConsensus.GetAccountCurrentAskOrderIds.instance);
+        map.put("getAccountCurrentBidOrderIds", APIConsensus.GetAccountCurrentBidOrderIds.instance);
+        map.put("getAllOpenOrders", APIConsensus.GetAllOpenOrders.instance);
+        map.put("getAskOrder", APIConsensus.GetAskOrder.instance);
+        map.put("getAskOrderIds", APIConsensus.GetAskOrderIds.instance);
+        map.put("getAskOrders", APIConsensus.GetAskOrders.instance);
+        map.put("getBidOrder", APIConsensus.GetBidOrder.instance);
+        map.put("getBidOrderIds", APIConsensus.GetBidOrderIds.instance);
+        map.put("getBidOrders", APIConsensus.GetBidOrders.instance);
+        
+        
+        //begin the transaction signing
+        map.put("sendMoney", APISigned.SendMoney.instance);
 
-        /*map.put("broadcastTransaction", BroadcastTransaction.instance);
+        /* need to make byte data for these
+         * 
+         * map.put("broadcastTransaction", BroadcastTransaction.instance);
         map.put("calculateFullHash", CalculateFullHash.instance);
         map.put("cancelAskOrder", CancelAskOrder.instance);
         map.put("cancelBidOrder", CancelBidOrder.instance);
@@ -117,27 +145,7 @@ public final class APIServlet extends HttpServlet {
         if (Constants.isTestnet) {
             map.put("getNextBlockGenerators", GetNextBlockGenerators.instance);
         }
-        map.put("getPeer", GetPeer.instance);
-        map.put("getPeers", GetPeers.instance);
-        map.put("getPoll", GetPoll.instance);
-        map.put("getPollIds", GetPollIds.instance);
-        map.put("getState", GetState.instance);
-        map.put("getTime", GetTime.instance);
-        map.put("getTrades", GetTrades.instance);
-        map.put("getAllTrades", GetAllTrades.instance);
-        map.put("getTransaction", GetTransaction.instance);
-        map.put("getTransactionBytes", GetTransactionBytes.instance);
-        map.put("getUnconfirmedTransactionIds", GetUnconfirmedTransactionIds.instance);
-        map.put("getUnconfirmedTransactions", GetUnconfirmedTransactions.instance);
-        map.put("getAccountCurrentAskOrderIds", GetAccountCurrentAskOrderIds.instance);
-        map.put("getAccountCurrentBidOrderIds", GetAccountCurrentBidOrderIds.instance);
-        map.put("getAllOpenOrders", GetAllOpenOrders.instance);
-        map.put("getAskOrder", GetAskOrder.instance);
-        map.put("getAskOrderIds", GetAskOrderIds.instance);
-        map.put("getAskOrders", GetAskOrders.instance);
-        map.put("getBidOrder", GetBidOrder.instance);
-        map.put("getBidOrderIds", GetBidOrderIds.instance);
-        map.put("getBidOrders", GetBidOrders.instance);
+
         map.put("issueAsset", IssueAsset.instance);
         map.put("leaseBalance", LeaseBalance.instance);
         map.put("markHost", MarkHost.instance);
@@ -147,10 +155,10 @@ public final class APIServlet extends HttpServlet {
         map.put("rsConvert", RSConvert.instance);
         map.put("readMessage", ReadMessage.instance);
         map.put("sendMessage", SendMessage.instance);
-        map.put("sendMoney", SendMoney.instance);
+        
         map.put("setAccountInfo", SetAccountInfo.instance);
         map.put("setAlias", SetAlias.instance);
-        map.put("signTransaction", SignTransaction.instance);
+        map.put("signTransaction", SignTransaction.instance); // the root of all evil
         map.put("startForging", StartForging.instance);
         map.put("stopForging", StopForging.instance);
         map.put("getForging", GetForging.instance);
