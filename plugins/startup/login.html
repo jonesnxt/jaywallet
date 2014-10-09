@@ -51,12 +51,12 @@ $(".unlock").submit(function(event) {
 		feeder = CryptoJS.SHA256(feeder).toString();
 	}
 	APIRequest("getAccountFile", "name="+$(".passfile").val(), function(account) {
-		var dt = JsonFormatter.parse(account.data);
-		var hex = CryptoJS.AES.decrypt(dt, $(".local").val(), {format: JsonFormatter});
-    		var bytes = []
-alert(hex.toString(CryptoJS.enc.Utf8));
+		dt = account.data.replace(/-/g, '+').replace(/_/g, '/');
+		while (dt.length % 4)
+			dt += '=';
+		var hex = CryptoJS.AES.decrypt(dt, feeder);
+    		var passphrase = hex.toString(CryptoJS.enc.Utf8);
 
-alert(passphrase);
 		if(passphrase[0] != 'J')
 		{
 			//passphrase incorrect
@@ -64,8 +64,8 @@ alert(passphrase);
 		}
 		else
 		{
-			APIRequest("initialize","passPhrase="+passphrase, function() {
-				window.location = "../template/index.html";
+			APIRequest("initialize","secretPhrase="+passphrase, function() {
+				window.location = "../base/index.html";
 			});
 		}
 	});

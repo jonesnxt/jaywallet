@@ -10,6 +10,8 @@ import java.nio.file.Path;
 
 import javax.servlet.http.HttpServletRequest;
 
+import jay.Jay;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
@@ -97,6 +99,23 @@ public class APIAccounts {
 				return response;
 			}
 			response.put("result", "success");
+			return response;
+	    }
+
+	}
+	
+	public static class GetLoggedAddress extends APIServlet.APIRequestHandler {
+
+	    static final GetLoggedAddress instance = new GetLoggedAddress();
+	    
+	    private GetLoggedAddress() {
+	        super(new APITag[] {APITag.ACCOUNTS});
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+			JSONObject response = new JSONObject();
+	    	response.put("address", Jay.master.rs);
 			return response;
 	    }
 

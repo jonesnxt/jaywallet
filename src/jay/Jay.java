@@ -58,7 +58,7 @@ public class Jay {
 	public static Label info;
 	
 	public static Account master;
-	public static boolean logged;
+	public static boolean logged = false;
 	public static JSONObject trans;
 	public static JSONObject data;
 	
@@ -84,7 +84,7 @@ public class Jay {
 		
 		final Browser browser;
 		try {
-			browser = new Browser(shell2, SWT.WEBKIT);
+			browser = new Browser(shell2, SWT.NONE);
 		} catch (SWTError e) {
 			System.out.println("Could not instantiate Browser: " + e.getMessage());
 			display.dispose();

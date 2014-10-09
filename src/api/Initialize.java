@@ -22,6 +22,7 @@ public class Initialize extends APIServlet.APIRequestHandler {
 
     @Override
     JSONStreamAware processRequest(HttpServletRequest req) {
+    	
     	if(Jay.logged)
     	{
     		JSONObject response = new JSONObject();

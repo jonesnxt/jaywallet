@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Bootstrap Admin Theme</title>
+    <title>Jay, Logged In</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="../util/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
@@ -23,12 +23,24 @@
     <!-- Custom Fonts -->
     <link href="../util/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <script src="../util/jquery.js"/>
+    <script src="../util/sb-admin-2/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../util/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../util/sb-admin-2/js/sb-admin-2.js"></script>
+	
+	<script src="../request/request.js"></script>
+	
+	<script>
+	$("document").ready(function() {
+	APIRequest("getLoggedAddress", "", function(addr) {
+		$(".navbar-brand").text(addr.address);
+		});
+	});
+	</script>
 
 </head>
 
@@ -45,7 +57,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.html">Jay Wallet</a>
+                <a class="navbar-brand" href="index.html"></a>
             </div>
             <!-- /.navbar-header -->
 
@@ -95,16 +107,10 @@
     <!-- /#wrapper -->
 
     <!-- jQuery Version 1.11.0 -->
-    <script src="../util/sb-admin-2/js/jquery-1.11.0.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="../util/sb-admin-2/js/bootstrap.min.js"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src="../util/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src="../util/sb-admin-2/js/sb-admin-2.js"></script>
+	
+	
 
 </body>
 

@@ -65,6 +65,7 @@ public final class APIServlet extends HttpServlet {
         
         // initialize account with secretphrase (needed for signed transactions)
         map.put("initialize", Initialize.instance);
+        map.put("getLoggedAddress", APIAccounts.GetLoggedAddress.instance);
         //map.put("logOut", LogOut.instance);
         map.put("signingPopup", SigningPopup.instance);
         map.put("verifySigning", VerifySigning.instance);

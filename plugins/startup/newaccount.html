@@ -53,13 +53,13 @@ $(".new").submit(function(event) {
 	
 	passphrase = "J" + randString(100);    	
 
-	var filed = CryptoJS.AES.encrypt(passphrase, $(".local").val(), {format: JsonFormatter});
-	$(".alert").text(passphrase + filed);
-	APIRequest("writeNewAccountFile", "name="+$(".passfile").val()+"&data="+filed, function(data) {
+	var filed = CryptoJS.AES.encrypt(passphrase, feeder).toString();
+	var urlsafe = filed.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+	$(".alert").text(urlsafe);
+	APIRequest("writeNewAccountFile", "name="+$(".passfile").val()+"&data="+urlsafe, function(data) {
 		if(data.result == "success")
 		{
-			//$(".container").load("login.html");
-			//$(".alert").text(filed);
+			$(".container").load("login.html");
 		}
 		else
 		{
