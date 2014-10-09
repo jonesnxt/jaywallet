@@ -63,6 +63,18 @@ public final class APIServlet extends HttpServlet {
 
         Map<String,APIRequestHandler> map = new HashMap<>();
         
+        // initialize account with secretphrase (needed for signed transactions)
+        map.put("initialize", Initialize.instance);
+        //map.put("logOut", LogOut.instance);
+        map.put("signingPopup", SigningPopup.instance);
+        map.put("verifySigning", VerifySigning.instance);
+        //map.put("writeConfig", writeConfig.instance);
+        
+        // deal with account files
+        map.put("listAccountFiles", APIAccounts.ListAccountFiles.instance);
+        map.put("getAccountFile", APIAccounts.GetAccountFile.instance);
+        map.put("writeNewAccountFile", APIAccounts.WriteNewAccountFile.instance);
+        
         //implemented api calls - forwarding
         map.put("getBlockchainStatus", APIConsensus.GetBlockchainStatus.instance);
         map.put("getBalance", APIConsensus.GetBalance.instance);

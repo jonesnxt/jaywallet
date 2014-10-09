@@ -3,12 +3,18 @@ package api;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Random;
+
+import javax.servlet.http.HttpServletRequest;
 
 import jay.Account;
+import jay.Jay;
 import jay.Nxtapi;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONStreamAware;
 
+import api.APIConsensus.GetBalance;
 import crypto.Constants;
 import crypto.Convert;
 import crypto.Crypto;
@@ -83,13 +89,14 @@ public class APISigned {
 	
 	public byte[] signed(byte type, byte subtype, int timestamp, short deadline, byte[] pubkey, long recid, long amt, long fee, int ecblock, String sec)
 	{
+		verifySigned(type, subtype,recid, amt);
 		byte[] sig = Crypto.sign(getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, ecblock, null), sec);
 		return getBytes(type, subtype, timestamp, deadline, pubkey, recid, amt, fee, ecblock, sig);
 	}
 	
 	public byte[] sendMoney(Account recipient, long amt)
 	{
-		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, this.pub, recipient.id, amt, 1, getecblock());
+		return signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, getTimestamp(), (short)24, Jay.master.pub, recipient.id, amt, 1, getecblock(), Jay.master.sec);
 	}
 	
 	int getTimestamp()
@@ -109,5 +116,45 @@ public class APISigned {
 		}
 		
 		return (int) st.get("numberOfBlocks")-5;
+	}
+	public static long verify = 0;
+	public boolean verifySigned(byte type, byte subtype, long recid, long amt)
+	{
+		Random a = new Random();
+		long checksum = a.nextLong();
+		JSONObject response = new JSONObject();
+		response.put("type", type);
+		response.put("subtype", subtype);
+		response.put("recid", recid);
+		response.put("amt", amt);
+		response.put("checksum", checksum);
+		SigningPopup.popupRequest(response);
+		while(verify != checksum)
+		{
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return true;
+	}
+	
+	public static class SendMoney extends APIServlet.APIRequestHandler {
+
+	    static final SendMoney instance = new SendMoney();
+
+	    private SendMoney() {
+	        super(new APITag[] {APITag.ACCOUNTS, APITag.CREATE_TRANSACTION}, "recipient", "amountNQT");
+	    }
+
+	    @Override
+	    JSONStreamAware processRequest(HttpServletRequest req) {
+	    	SigningPopup.call = true;
+			return null;
+	        //byte[] trans = signed(Constants.TYPE_PAYMENT, Constants.SUBTYPE_PAYMENT_ORDINARY_PAYMENT, (short)1440, )
+	    }
+
 	}
 }

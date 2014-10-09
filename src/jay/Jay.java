@@ -58,36 +58,10 @@ public class Jay {
 	public static Label info;
 	
 	public static Account master;
+	public static boolean logged;
 	public static JSONObject trans;
 	public static JSONObject data;
-	public static void startup(Display display)
-	{
-		System.out.println("Jay wallet startup (:");
-		Shell shell = new Shell(display);
-        shell.setText("Jay Wallet");
-        shell.setSize(300, 100);
-		shell.setLayout(new FillLayout());
-		
-        Jay.info = new Label(shell, SWT.NONE);
-        
-        shell.open();
-        trans = new JSONObject(Constants.JSON_DEF);
-        data = new JSONObject(Constants.JSON_DEF);
-        master = new Account(getfile("nxt.pass"));
-		try {
-			trans = Nxtapi.consensus("getAccountTrasactions", "account="+master.rs);
-			data = Nxtapi.consensus("getAccount", "account="+master.rs);
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(trans.toString());
-		
-		shell.close();
-		
-		
-	}
+	
 	
 	public Nxtapi api = new Nxtapi();
 	public static void main(String[] args) throws InterruptedException { 
@@ -102,7 +76,7 @@ public class Jay {
 		
 		Shell shell2 = new Shell(display);
 		shell2.setLayout(new FillLayout());
-		shell2.setText("NXT Lightweight");
+		shell2.setText("Jay - NXT Modular");
 		
 		//Display display = new Display();
         //newlayout(display);
@@ -124,10 +98,6 @@ public class Jay {
 		
 
 		browser.setUrl("http://127.0.0.1:9987/");
-		
-		//new Fgetaddress (browser, "getaddress");
-		//new Fgettransactions (browser, "gettransactions");
-		//new Fgetamount (browser, "getamount");
 		
 		while (!shell2.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
@@ -189,93 +159,9 @@ public class Jay {
 		
 		return acc;
 	}
-	
-	
-	static class Fgetaddress extends BrowserFunction {
-		Fgetaddress (Browser browser, String name) {
-			super (browser, name);
-		}
-		@Override
-		public String function (Object[] arguments) {
-			return master.rs;
-		}
-	}
-	
-	static class Fgetamount extends BrowserFunction {
-		Fgetamount (Browser browser, String name) {
-			super (browser, name);
-		}
-		@Override
-		public String function (Object[] arguments) {
-			return (String) data.get("unconfirmedBalanceNQT");
-		}
-	}
-	
-	static class Fgettransactions extends BrowserFunction {
-		Fgettransactions (Browser browser, String name) {
-			super (browser, name);
-		}
-		@Override
-		public String function (Object[] arguments) {
-			System.out.println("abc");
-			JSONObject tra = (JSONObject) JSONValue.parse(getfile("testtrans.txt"));
-			System.out.println(tra.toString());
-			JSONArray arr = (JSONArray) tra.get("transactions");
-			String acc = "";
-			System.out.println("abc");
-
-			for(int a=0; a != arr.size(); a++)
-			{
-				JSONObject ind = (JSONObject) arr.get(a);
-				acc += "<tr>";
-				acc += "<td>" + (Long) ind.get("amountNQT")/Constants.ONE_NXT + "</td>";
-				acc += "<td>" + (String) ind.get("senderRS") + "</td>";
-				acc += "<td>" +  timeago((int)ind.get("timestamp")) + "</td>";
-				acc += "<td>" + (int) ind.get("confirmations") + "</td>";
-				acc += "</tr>";
-				
-			}
-			
-			System.out.println(acc);
-			return acc;
-			
-		}
-	}
 
 	static void startjetty()
-	{
-		/*final Server server = new Server();
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(9987);
-        server.addConnector(connector);
- 
-        ResourceHandler resource_handler = new ResourceHandler();
-        resource_handler.setDirectoriesListed(true);
-        resource_handler.setWelcomeFiles(new String[]{ "index.html" });
- 
-        resource_handler.setResourceBase("html");
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler() });
-        server.setHandler(handlers);
- 
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server.start();
-                    server.join();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.toString(), e);
-                }
-
-            }
-        };
-        
-	       new Thread(r, "jetty").start();
-        
-			*/
-			
-		
+	{	
 		
 		Server server = new Server();
 		 
@@ -292,18 +178,16 @@ public class Jay {
 
         ServletHolder defaultServletHolder = new ServletHolder(new DefaultServlet());
         defaultServletHolder.setInitParameter("dirAllowed", "false");
-        defaultServletHolder.setInitParameter("resourceBase", "html/ui");
+        defaultServletHolder.setInitParameter("resourceBase", "plugins");
         defaultServletHolder.setInitParameter("welcomeServlets", "true");
         defaultServletHolder.setInitParameter("redirectWelcome", "true");
         defaultServletHolder.setInitParameter("gzip", "false");
         apiHandler.addServlet(defaultServletHolder, "/*");
         apiHandler.setWelcomeFiles(new String[]{"index.html"});
-        apiHandler.addServlet(APIServlet.class, "/nxt");
+        apiHandler.addServlet(APIServlet.class, "/api");
         
         apiHandlers.addHandler(apiHandler);
         apiHandlers.addHandler(new DefaultHandler());
-       
-
 
         server.setHandler(apiHandlers);
         server.setStopAtShutdown(true);
